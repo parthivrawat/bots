@@ -37,7 +37,7 @@ Companion to `BOT_DEV_ROADMAP.md`. Organized by phase so you can read theory alo
 | [Celery docs](https://docs.celeryq.dev/) | Background tasks & scheduled jobs |
 | [APScheduler docs](https://apscheduler.readthedocs.io/) | Lightweight in-process scheduling |
 | [MDN — Webhooks concept](https://docs.github.com/en/webhooks) | GitHub's webhook docs are a good conceptual intro |
-| [Idempotency (Stripe engineering)](https://stripe.com/docs/idempotent-requests) | How Stripe handles idempotent APIs — pattern worth copying |
+| [Idempotency (Stripe engineering)](https://docs.stripe.com/api/idempotent_requests?...=) | How Stripe handles idempotent APIs — pattern worth copying |
 
 ---
 
