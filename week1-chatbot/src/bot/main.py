@@ -10,6 +10,8 @@ import logging
 import signal
 
 from .adapters.discord_bot import DiscordAdapter
+from .adapters.reddit_bot import RedditAdapter
+from .adapters.slack_bot import SlackAdapter
 from .adapters.telegram_bot import TelegramAdapter
 from .app import build_app
 from .config import AppSettings
@@ -23,8 +25,17 @@ logger = logging.getLogger(__name__)
 
 async def amain() -> None:
     settings = AppSettings.from_env()
-    if not settings.telegram_token and not settings.discord_token:
-        raise SystemExit("Set TELEGRAM_TOKEN and/or DISCORD_TOKEN in .env")
+    has_reddit = all([
+        settings.reddit_client_id, settings.reddit_client_secret,
+        settings.reddit_username, settings.reddit_password,
+        settings.reddit_user_agent,
+    ])
+    has_slack = settings.slack_bot_token and settings.slack_app_token
+    if not any([settings.telegram_token, settings.discord_token, has_slack, has_reddit]):
+        raise SystemExit(
+            "No platform configured — set TELEGRAM_TOKEN, DISCORD_TOKEN, "
+            "SLACK_BOT_TOKEN+SLACK_APP_TOKEN, or the REDDIT_* vars in .env"
+        )
 
     app = await build_app(settings)
     adapters = []
@@ -32,6 +43,17 @@ async def amain() -> None:
         adapters.append(TelegramAdapter(app, settings.telegram_token))
     if settings.discord_token:
         adapters.append(DiscordAdapter(app, settings.discord_token))
+    if has_slack:
+        adapters.append(SlackAdapter(app, settings.slack_bot_token, settings.slack_app_token))
+    if has_reddit:
+        adapters.append(RedditAdapter(
+            app,
+            client_id=settings.reddit_client_id,
+            client_secret=settings.reddit_client_secret,
+            username=settings.reddit_username,
+            password=settings.reddit_password,
+            user_agent=settings.reddit_user_agent,
+        ))
 
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()

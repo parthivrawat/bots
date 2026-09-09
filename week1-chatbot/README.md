@@ -9,8 +9,9 @@ permissions, rate limiting, and clean seams.
 
 ```
 Telegram ──► TelegramAdapter ─┐
-                              ├──► Router ──► Middleware ──► Handlers ──► Services ──► Repos ──► SQLite
-Discord  ──► DiscordAdapter  ─┘              (logging, auth, ratelimit)
+Discord  ──► DiscordAdapter   │
+Slack    ──► SlackAdapter     ├──► Router ──► Middleware ──► Handlers ──► Services ──► Repos ──► SQLite
+Reddit   ──► RedditAdapter    │              (logging, auth, ratelimit)
 Eval     ──► EvalAdapter     ─┘
 ```
 
@@ -48,7 +49,14 @@ copy .env.example .env   # fill in tokens
 **Telegram**: talk to `@BotFather` → `/newbot` → paste token into `.env`.
 **Discord**: Developer Portal → New Application → Bot → token; enable
 *Message Content Intent* under Bot settings, invite with `Send Messages` scope.
-**Admins**: set `ADMIN_IDS=telegram:<your-id>` (find your id via any id bot).
+**Slack**: api.slack.com → New App → Socket Mode ON → app-level token
+(`connections:write`) → bot scopes `app_mentions:read`, `chat:write`,
+`im:history`, `im:read` → install to workspace → both tokens into `.env`.
+**Reddit**: reddit.com/prefs/apps → "script" app → client id/secret +
+account credentials into `.env`. The bot answers `u/<botname>` mentions,
+DMs, and comment replies.
+**Admins**: set `ADMIN_IDS=telegram:<your-id>` (find your id via any id bot);
+Slack ids look like `slack:U0XXXXXXX`, Reddit is `reddit:<username>`.
 
 ## Run
 
