@@ -1,0 +1,5 @@
+# The eval framework itself has ZERO dependencies (Python 3.10+ stdlib only).
+# Add your bot's own dependencies here, e.g.:
+# openai>=1.40
+# anthropic>=0.34
+# python-telegram-bot>=21.0

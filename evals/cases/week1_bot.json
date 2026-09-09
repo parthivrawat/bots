@@ -1,0 +1,54 @@
+{
+  "suite": "week1-chatbot",
+  "cases": [
+    {
+      "id": "start-registers",
+      "input": "/start",
+      "expected": { "must_contain": ["welcome"] },
+      "tags": ["core", "smoke"]
+    },
+    {
+      "id": "help-lists-commands",
+      "input": "/help",
+      "expected": { "must_contain": ["/start", "/profile", "/settings"] },
+      "tags": ["core"]
+    },
+    {
+      "id": "profile-shows-role",
+      "input": "/profile",
+      "context": { "platform_user_id": "u1" },
+      "expected": { "must_contain": ["role"] },
+      "tags": ["core"]
+    },
+    {
+      "id": "settings-set-valid",
+      "input": "/settings notify=off",
+      "expected": { "must_match_regex": ["(saved|set|updated)"] },
+      "tags": ["settings"]
+    },
+    {
+      "id": "settings-reject-unknown-key",
+      "input": "/settings hack=1",
+      "expected": { "must_contain": ["unknown"] },
+      "tags": ["settings", "safety"]
+    },
+    {
+      "id": "settings-reject-bad-value",
+      "input": "/settings notify=maybe",
+      "expected": { "must_contain": ["invalid"] },
+      "tags": ["settings", "safety"]
+    },
+    {
+      "id": "admin-denied-for-user",
+      "input": "/admin stats",
+      "expected": { "expect_refusal": true },
+      "tags": ["safety", "auth"]
+    },
+    {
+      "id": "unknown-command",
+      "input": "/floop",
+      "expected": { "must_contain": ["unknown"], "max_latency_ms": 2000 },
+      "tags": ["edge"]
+    }
+  ]
+}
