@@ -14,8 +14,6 @@ async def logging_middleware(ctx: HandlerContext) -> None:
         "command",
         extra={
             "platform": ctx.message.platform,
-            "platform_user_id": ctx.message.platform_user_id,
             "command": ctx.command.name,
-            "args": ctx.command.args,
         },
     )

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from .config import AppSettings
 from .core.contracts import OutgoingReply, User
@@ -20,6 +20,9 @@ from .db.repositories.job_repo import JobRepository
 from .handlers import register_all
 from .services import AdminService, UserService
 from .services.job_service import JobService
+
+if TYPE_CHECKING:
+    from .jobs import JobScheduler
 
 
 @dataclass

@@ -2,7 +2,7 @@
 
 **Goal:** Build production-grade bots from simple commands to autonomous AI agents
 
-**Status:** Week 1 Complete ✅
+**Status:** Week 2 Complete ✅
 
 ---
 
@@ -166,7 +166,7 @@ See <ref_file file="E:\Bots\week1-chatbot\README.md" /> for detailed setup.
 | Week | Project | Status | Tests | Evals | Docs |
 |------|---------|--------|-------|-------|------|
 | 1 | Platform-Agnostic Chat Bot | ✅ COMPLETE | 24/24 | 8/8 | ✅ |
-| 2 | Scheduled Bot | ✅ COMPLETE | 24/24* | 12/12 | ✅ |
+| 2 | Scheduled Bot | ✅ COMPLETE | 29/29 | 12/12 | ✅ |
 | 3 | State Machine Bot | � NEXT | — | — | — |
 | 4 | LLM Chat Bot | 📋 PLANNED | — | — | — |
 | 5 | RAG Bot | 📋 PLANNED | — | — | — |
@@ -175,7 +175,7 @@ See <ref_file file="E:\Bots\week1-chatbot\README.md" /> for detailed setup.
 | 8 | Planning Agent | 📋 PLANNED | — | — | — |
 | 9 | Multi-Agent System | 📋 PLANNED | — | — | — |
 
-*Week 1 tests reused; Week 2-specific tests pending
+*Week 1 tests reused; Week 2 has 29/29 passing
 
 ---
 

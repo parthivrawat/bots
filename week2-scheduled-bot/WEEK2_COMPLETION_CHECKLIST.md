@@ -57,7 +57,7 @@ Scheduled automation bot extending the Week 1 core with background jobs, API int
   - [x] `/subscribe weather` and `/unsubscribe weather`
   - [x] `/alert`, `/alerts`, and `/alert cancel`
   - [x] `/admin jobs`, `/admin job ... enable/disable/trigger`
-- [x] `pytest` green: 28/28 passing
+- [x] `pytest` green: 29/29 passing
 
 ## Documentation
 

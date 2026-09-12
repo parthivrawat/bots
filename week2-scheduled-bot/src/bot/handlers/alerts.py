@@ -55,7 +55,7 @@ async def alert_handler(ctx: HandlerContext) -> str:
             f"You'll be notified when the price crosses this threshold.\n"
             f"Use `/alerts` to see all your alerts."
         )
-    except ValidationError as e:
+    except (ValidationError, ValueError) as e:
         return str(e)
 
 

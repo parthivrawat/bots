@@ -34,8 +34,7 @@ class JSONFormatter(logging.Formatter):
             log_obj["platform_user_id"] = record.platform_user_id
         if hasattr(record, "command"):
             log_obj["command"] = record.command
-        if hasattr(record, "args"):
-            log_obj["args"] = record.args
+
         if record.exc_info:
             log_obj["exception"] = self.formatException(record.exc_info)
         return json.dumps(log_obj)

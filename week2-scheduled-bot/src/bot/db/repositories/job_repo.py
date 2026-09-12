@@ -140,7 +140,7 @@ class JobRepository:
                 status,
                 result_summary,
                 error_message,
-                json.dumps(output_data) if output_data else None,
+                json.dumps(output_data) if output_data is not None else None,
                 run_id,
             ),
         )

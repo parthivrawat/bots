@@ -68,8 +68,12 @@ class RedditAdapter:
         logger.info("Reddit adapter watching inbox")
         try:
             async for item in self.reddit.inbox.stream(skip_existing=True):
-                if isinstance(item, (Comment, Message)):
+                if isinstance(item, Comment):
                     await self._handle(item)
+                elif isinstance(item, Message):
+                    text = getattr(item, "body", "")
+                    if text.startswith("/") or text.startswith("!"):
+                        await self._handle(item)
         except asyncio.CancelledError:
             raise
         except Exception:

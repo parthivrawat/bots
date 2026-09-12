@@ -59,10 +59,12 @@ class UserService:
                 f"Unknown setting '{key}'. Available: {', '.join(sorted(ALLOWED_SETTINGS))}"
             )
         choices = ALLOWED_SETTINGS[key]
-        if choices is not None and value.lower() not in choices:
-            raise ValidationError(
-                f"Invalid value '{value}' for '{key}'. Choose: {', '.join(sorted(choices))}"
-            )
+        if choices is not None:
+            value = value.lower()
+            if value not in choices:
+                raise ValidationError(
+                    f"Invalid value '{value}' for '{key}'. Choose: {', '.join(sorted(choices))}"
+                )
         await self.users.set_setting(user.id, key, value)
         return f"Setting saved: {key} = {value}"
 
