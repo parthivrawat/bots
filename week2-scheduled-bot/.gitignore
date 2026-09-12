@@ -1,0 +1,29 @@
+# Environments
+.env
+.venv/
+venv/
+env/
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.whl
+*.tar.gz
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db

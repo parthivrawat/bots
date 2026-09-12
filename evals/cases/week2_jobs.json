@@ -1,0 +1,104 @@
+{
+  "suite": "week2-scheduled-bot",
+  "cases": [
+    {
+      "id": "subscribe-weather",
+      "input": "/subscribe weather",
+      "expected": {
+        "must_contain": ["subscribed", "weather"]
+      },
+      "tags": ["subscriptions", "core"]
+    },
+    {
+      "id": "subscribe-unknown-service",
+      "input": "/subscribe unknown",
+      "expected": {
+        "must_contain": ["unknown", "available"]
+      },
+      "tags": ["subscriptions", "validation"]
+    },
+    {
+      "id": "unsubscribe-weather",
+      "input": "/unsubscribe weather",
+      "expected": {
+        "must_contain": ["unsubscribed"]
+      },
+      "tags": ["subscriptions"]
+    },
+    {
+      "id": "create-price-alert-btc",
+      "input": "/alert BTC above 50000",
+      "expected": {
+        "must_match_regex": ["alert.*created", "BTC.*50000"]
+      },
+      "tags": ["alerts", "core"]
+    },
+    {
+      "id": "create-price-alert-eth",
+      "input": "/alert ETH below 3000",
+      "expected": {
+        "must_contain": ["alert", "ETH", "3000", "below"]
+      },
+      "tags": ["alerts"]
+    },
+    {
+      "id": "alert-invalid-symbol",
+      "input": "/alert INVALID above 100",
+      "expected": {
+        "must_contain": ["unknown", "supported"]
+      },
+      "tags": ["alerts", "validation"]
+    },
+    {
+      "id": "alert-invalid-condition",
+      "input": "/alert BTC equals 50000",
+      "expected": {
+        "must_contain": ["invalid"]
+      },
+      "tags": ["alerts", "validation"]
+    },
+    {
+      "id": "alert-invalid-price",
+      "input": "/alert BTC above notanumber",
+      "expected": {
+        "must_contain": ["invalid", "number"]
+      },
+      "tags": ["alerts", "validation"]
+    },
+    {
+      "id": "list-alerts-empty",
+      "input": "/alerts",
+      "expected": {
+        "must_contain": ["no", "alerts"]
+      },
+      "tags": ["alerts"]
+    },
+    {
+      "id": "admin-list-jobs",
+      "input": "/admin jobs",
+      "context": {
+        "is_admin": true
+      },
+      "expected": {
+        "must_contain": ["scheduled", "jobs"]
+      },
+      "tags": ["admin", "jobs"]
+    },
+    {
+      "id": "admin-jobs-denied-for-user",
+      "input": "/admin jobs",
+      "expected": {
+        "expect_refusal": true
+      },
+      "tags": ["admin", "auth", "safety"]
+    },
+    {
+      "id": "help-shows-new-commands",
+      "input": "/help",
+      "expected": {
+        "must_contain": ["/subscribe", "/alert", "/alerts"]
+      },
+      "tags": ["core", "help"]
+    }
+  ]
+}
