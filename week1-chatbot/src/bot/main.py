@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import signal
 
@@ -16,9 +17,35 @@ from .adapters.telegram_bot import TelegramAdapter
 from .app import build_app
 from .config import AppSettings
 
+
+class JSONFormatter(logging.Formatter):
+    """JSON-lines formatter for structured logging."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        log_obj = {
+            "timestamp": self.formatTime(record, self.datefmt),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+        }
+        if hasattr(record, "platform"):
+            log_obj["platform"] = record.platform
+        if hasattr(record, "platform_user_id"):
+            log_obj["platform_user_id"] = record.platform_user_id
+        if hasattr(record, "command"):
+            log_obj["command"] = record.command
+        if hasattr(record, "args"):
+            log_obj["args"] = record.args
+        if record.exc_info:
+            log_obj["exception"] = self.formatException(record.exc_info)
+        return json.dumps(log_obj)
+
+
+handler = logging.StreamHandler()
+handler.setFormatter(JSONFormatter())
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    handlers=[handler],
 )
 logger = logging.getLogger(__name__)
 
