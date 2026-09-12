@@ -65,6 +65,7 @@ async def amain() -> None:
 
     app = await build_app(settings)
     adapters = []
+    app.adapters = adapters
     if settings.telegram_token:
         adapters.append(TelegramAdapter(app, settings.telegram_token))
     if settings.discord_token:
@@ -89,20 +90,35 @@ async def amain() -> None:
         except NotImplementedError:
             pass  # Windows: fall back to KeyboardInterrupt
 
+    # Start adapters
     for a in adapters:
         await a.start()
-    logger.info("Bot running with %d adapter(s); Ctrl+C to stop", len(adapters))
+    
+    # Start scheduler (Week 2)
+    if app.scheduler:
+        await app.scheduler.start()
+        logger.info("Bot running with %d adapter(s) + scheduler; Ctrl+C to stop", len(adapters))
+    else:
+        logger.info("Bot running with %d adapter(s); Ctrl+C to stop", len(adapters))
 
     try:
         await stop.wait()
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass
     finally:
+        # Stop scheduler first (wait for running jobs)
+        if app.scheduler:
+            logger.info("Stopping scheduler...")
+            await app.scheduler.stop()
+        
+        # Then stop adapters
         for a in adapters:
             try:
                 await a.stop()
             except Exception:
                 logger.exception("adapter stop failed")
+        
+        # Finally close app (database, etc.)
         await app.close()
 
 
