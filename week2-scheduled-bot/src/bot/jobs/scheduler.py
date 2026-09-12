@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Awaitable, Callable
@@ -30,6 +31,7 @@ class JobScheduler:
         self.app = app
         self.scheduler = AsyncIOScheduler(timezone="UTC")
         self._jobs: dict[str, JobFunc] = {}
+        self._locks: dict[str, asyncio.Lock] = {}
 
     async def start(self) -> None:
         """Start the scheduler and register all jobs."""
@@ -139,44 +141,47 @@ class JobScheduler:
             logger.error(f"Job record not found in DB: {name}")
             return "ERROR: Job record not found"
 
-        # Create job run record
-        run_id = await self.app.services.jobs.create_job_run(job_record.id)
-        
-        try:
-            logger.info(f"Executing job: {name} (run_id={run_id})")
-            result = await func(self.app)
-            
-            # Mark as success
-            await self.app.services.jobs.finish_job_run(
-                run_id, status="success", result_summary=result
-            )
-            
-            # Update job run times
-            now = datetime.now(timezone.utc).isoformat()
-            next_run = self.scheduler.get_job(name)
-            next_run_time = None
-            if next_run is not None:
-                nrt = getattr(next_run, "next_run_time", None)
-                if nrt is not None:
-                    next_run_time = nrt.isoformat()
-            await self.app.services.jobs.update_job_run_times(
-                name, last_run_at=now, next_run_at=next_run_time
-            )
-            
-            logger.info(f"Job completed: {name} - {result}")
-            return result
-            
-        except Exception as e:
-            logger.exception(f"Job failed: {name}")
-            
-            # Mark as failed
-            await self.app.services.jobs.finish_job_run(
-                run_id,
-                status="failed",
-                error_message=str(e),
-            )
-            
-            return f"ERROR: {str(e)}"
+        lock = self._locks.setdefault(name, asyncio.Lock())
+        async with lock:
+            # Create job run record
+            run_id = await self.app.services.jobs.create_job_run(job_record.id)
+
+            try:
+                logger.info(f"Executing job: {name} (run_id={run_id})")
+                result = await func(self.app)
+
+                # Mark as success
+                await self.app.services.jobs.finish_job_run(
+                    run_id, status="success", result_summary=result
+                )
+
+                logger.info(f"Job completed: {name} - {result}")
+                return result
+
+            except Exception as e:
+                logger.exception(f"Job failed: {name}")
+
+                # Mark as failed
+                await self.app.services.jobs.finish_job_run(
+                    run_id,
+                    status="failed",
+                    error_message=str(e),
+                )
+
+                return f"ERROR: {str(e)}"
+
+            finally:
+                # Update last_run_at regardless of success or failure
+                now = datetime.now(timezone.utc).isoformat()
+                next_run = self.scheduler.get_job(name)
+                next_run_time = None
+                if next_run is not None:
+                    nrt = getattr(next_run, "next_run_time", None)
+                    if nrt is not None:
+                        next_run_time = nrt.isoformat()
+                await self.app.services.jobs.update_job_run_times(
+                    name, last_run_at=now, next_run_at=next_run_time
+                )
 
     async def _register_all_jobs(self) -> None:
         """Register all job definitions from job modules."""

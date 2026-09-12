@@ -44,16 +44,20 @@ async def health_check_job(app: App) -> str:
         # Alert admins
         admins = await app.services.users.get_admins()
         message = f"⚠️ **Health Check Failed**\n\nUnhealthy services: {', '.join(failures)}"
-        
+
         for admin in admins:
             try:
                 await app.send_to_user(admin, message)
             except Exception as e:
                 logger.error(f"Failed to alert admin {admin.id}: {e}")
-        
-        return f"UNHEALTHY: {', '.join(failures)}"
-    
+
+        raise HealthCheckError(f"UNHEALTHY: {', '.join(failures)}")
+
     return "All systems healthy"
+
+
+class HealthCheckError(Exception):
+    """Raised when a health check finds unhealthy services."""
 
 
 async def register(scheduler: JobScheduler, app: App) -> None:

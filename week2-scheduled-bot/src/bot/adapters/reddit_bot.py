@@ -93,5 +93,5 @@ class RedditAdapter:
         await self.reddit.close()
 
     async def send(self, user: User, message: str) -> None:
-        # Reddit DM delivery is supported by asyncpraw but left as a future enhancement.
-        logger.info("Reddit send to u/%s: %s", user.platform_user_id, message)
+        redditor = await self.reddit.redditor(user.platform_user_id)
+        await redditor.message(subject="Notification", message=message)

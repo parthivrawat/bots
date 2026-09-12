@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from apscheduler.triggers.interval import IntervalTrigger
 
-from ..fetchers.crypto_api import CryptoFetcher, format_price_alert
+from ..fetchers.crypto_api import CryptoAPIError, CryptoFetcher, format_price_alert
 
 if TYPE_CHECKING:
     from ..app import App
@@ -30,50 +30,56 @@ async def price_alert_job(app: App) -> str:
     
     triggered_count = 0
     error_count = 0
-    
+    skipped_count = 0
+    api_failed = False
+
     async with CryptoFetcher() as crypto_api:
         for alert in alerts:
+            if api_failed:
+                skipped_count += 1
+                continue
+
             try:
-                # Fetch current price
                 current_price = await crypto_api.get_price(alert.symbol)
-                
-                # Check if threshold crossed
+
                 should_trigger = False
                 if alert.condition == "above" and current_price > alert.threshold:
                     should_trigger = True
                 elif alert.condition == "below" and current_price < alert.threshold:
                     should_trigger = True
-                
+
                 if should_trigger:
-                    # Get user
                     user = await app.services.users.get(alert.user_id)
                     if not user:
                         logger.error(f"User not found for alert {alert.id}")
                         continue
-                    
-                    # Format and send alert
+
                     message = format_price_alert(
                         alert.symbol, current_price, alert.condition, alert.threshold
                     )
                     await app.send_to_user(user, message)
-                    
-                    # Mark alert as triggered
                     await app.services.jobs.mark_alert_triggered(alert.id)
-                    
+
                     triggered_count += 1
                     logger.info(
                         f"Triggered alert {alert.id}: {alert.symbol} "
                         f"{alert.condition} ${alert.threshold}"
                     )
-                
+
+            except CryptoAPIError as e:
+                logger.error(f"CoinGecko API failed for {alert.symbol}: {e}")
+                error_count += 1
+                api_failed = True
             except Exception as e:
                 logger.error(f"Failed to process alert {alert.id}: {e}")
                 error_count += 1
-    
+
     result = f"Checked {len(alerts)} alerts, triggered {triggered_count}"
+    if skipped_count > 0:
+        result += f", {skipped_count} skipped after API failure"
     if error_count > 0:
         result += f", {error_count} errors"
-    
+
     return result
 
 

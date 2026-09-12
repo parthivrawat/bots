@@ -86,5 +86,6 @@ class SlackAdapter:
                 pass
 
     async def send(self, user: User, message: str) -> None:
-        # Slack DM delivery requires opening a conversation channel first.
-        logger.info("Slack send to %s: %s", user.platform_user_id, message)
+        resp = await self.bolt.client.conversations_open(users=user.platform_user_id)
+        channel = resp["channel"]["id"]
+        await self.bolt.client.chat_postMessage(channel=channel, text=message)

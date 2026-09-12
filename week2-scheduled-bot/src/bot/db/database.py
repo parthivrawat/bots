@@ -63,8 +63,12 @@ class Database:
                 continue
             logger.info("applying migration %s", f.name)
             async with self._lock:
-                await self.conn.executescript(f.read_text(encoding="utf-8"))
-                await self.conn.execute(
-                    "INSERT INTO schema_migrations (version) VALUES (?)", (version,)
-                )
-                await self.conn.commit()
+                try:
+                    await self.conn.executescript(f.read_text(encoding="utf-8"))
+                    await self.conn.execute(
+                        "INSERT INTO schema_migrations (version) VALUES (?)", (version,)
+                    )
+                    await self.conn.commit()
+                except Exception:
+                    await self.conn.rollback()
+                    raise

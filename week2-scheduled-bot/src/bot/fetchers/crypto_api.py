@@ -10,6 +10,10 @@ import aiohttp
 logger = logging.getLogger(__name__)
 
 
+class CryptoAPIError(Exception):
+    """Raised when CoinGecko is unreachable or returns an error after retries."""
+
+
 @dataclass
 class CryptoPrice:
     symbol: str
@@ -34,9 +38,13 @@ class CryptoFetcher:
         "DOGE": "dogecoin",
     }
 
+    MAX_RETRIES = 3
+
     def __init__(self, session: aiohttp.ClientSession | None = None):
         self.session = session
         self._own_session = session is None
+        self._cache: dict[str, float] = {}
+        self._failed: set[str] = set()
 
     async def __aenter__(self):
         if self._own_session:
@@ -49,18 +57,24 @@ class CryptoFetcher:
 
     async def get_price(self, symbol: str) -> float:
         """
-        Get current price for a crypto symbol.
-        
+        Get current price for a crypto symbol, with run-level caching and retries.
+
         Args:
             symbol: Crypto symbol (e.g., 'BTC', 'ETH')
-            
+
         Returns:
             Current price in USD
         """
         if not self.session:
             raise RuntimeError("CryptoFetcher must be used as async context manager")
 
-        coin_id = self.SYMBOL_MAP.get(symbol.upper())
+        key = symbol.upper()
+        if key in self._cache:
+            return self._cache[key]
+        if key in self._failed:
+            raise CryptoAPIError(f"CoinGecko already failed for {key}; skipping")
+
+        coin_id = self.SYMBOL_MAP.get(key)
         if not coin_id:
             raise ValueError(f"Unknown crypto symbol: {symbol}")
 
@@ -71,23 +85,32 @@ class CryptoFetcher:
             "include_24hr_change": "true",
         }
 
-        try:
-            async with self.session.get(
-                url, params=params, timeout=aiohttp.ClientTimeout(total=10)
-            ) as resp:
-                if resp.status != 200:
-                    logger.error(f"CoinGecko API error: {resp.status}")
-                    raise Exception(f"CoinGecko API returned {resp.status}")
+        last_error: Exception | None = None
+        for attempt in range(self.MAX_RETRIES):
+            try:
+                async with self.session.get(
+                    url, params=params, timeout=aiohttp.ClientTimeout(total=10)
+                ) as resp:
+                    if resp.status != 200:
+                        raise CryptoAPIError(f"CoinGecko API returned {resp.status}")
 
-                data = await resp.json()
-                if coin_id not in data:
-                    raise Exception(f"No data for {symbol}")
+                    data = await resp.json()
+                    if coin_id not in data:
+                        raise CryptoAPIError(f"No data for {symbol}")
 
-                return data[coin_id]["usd"]
+                    price = data[coin_id]["usd"]
+                    self._cache[key] = price
+                    return price
 
-        except Exception as e:
-            logger.exception(f"Failed to fetch price for {symbol}")
-            raise
+            except (aiohttp.ClientError, CryptoAPIError) as e:
+                last_error = e
+                logger.warning("CoinGecko attempt %d/%d failed for %s: %s", attempt + 1, self.MAX_RETRIES, key, e)
+
+        logger.exception("Failed to fetch price for %s after %d retries", key, self.MAX_RETRIES)
+        self._failed.add(key)
+        if last_error is None:
+            last_error = CryptoAPIError(f"Failed to fetch price for {symbol}")
+        raise last_error
 
     async def get_price_detailed(self, symbol: str) -> CryptoPrice:
         """Get detailed price info including 24h change."""

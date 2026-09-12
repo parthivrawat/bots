@@ -59,7 +59,7 @@ class App:
                     logger.info("Delivering %s message to %s", user.platform, user.platform_user_id)
                     return await adapter.send(user, message)
                 raise RuntimeError(f"Adapter for {user.platform} has no send() method")
-        logger.warning("No adapter for %s; message not sent: %s", user.platform, message)
+        raise RuntimeError(f"No adapter configured for {user.platform}; message not delivered")
 
 
 async def build_app(settings: AppSettings) -> App:
