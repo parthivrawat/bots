@@ -106,7 +106,7 @@ class Router:
                     user_id = ctx.user.id if ctx and ctx.user else None
                     await self.services.audit.log(
                         user_id=user_id,
-                        command=msg.text.strip().split(maxsplit=1)[0] if msg.text else "",
+                        command=(msg.text.strip().split(maxsplit=1)[0] if msg.text.strip() else ""),
                         args=msg.text.strip(),
                         result=result,
                         platform=msg.platform,

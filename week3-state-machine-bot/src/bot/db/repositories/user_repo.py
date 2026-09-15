@@ -112,7 +112,7 @@ class UserRepository:
             (key, value),
         )
         rows = await cur.fetchall()
-        return [self._row_to_user(row) for row in rows]
+        return [_row_to_user(row) for row in rows]
 
     async def get_admins(self) -> list[User]:
         """Get all admin users."""
@@ -120,4 +120,4 @@ class UserRepository:
             "SELECT * FROM users WHERE role = 'admin'"
         )
         rows = await cur.fetchall()
-        return [self._row_to_user(row) for row in rows]
+        return [_row_to_user(row) for row in rows]

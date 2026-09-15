@@ -28,7 +28,7 @@ class StateService:
         }
 
     async def start(self, ctx: HandlerContext, workflow: str) -> str:
-        active = await self.repo.get_active(ctx.user.id, workflow)
+        active = await self.repo.get_active(ctx.user.id)
         if active:
             return "You already have an active workflow. Send /cancel to stop."
 

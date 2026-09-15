@@ -11,6 +11,6 @@ CREATE TABLE conversation_states (
     updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX idx_conversation_user_active
-    ON conversation_states(user_id, status)
+CREATE UNIQUE INDEX idx_conversation_user_active
+    ON conversation_states(user_id)
     WHERE status = 'active';

@@ -7,12 +7,12 @@ def test_slack_strips_mention():
     assert clean_slack_text("<@U0123> /profile") == "/profile"
 
 
-def test_slack_bare_word_becomes_command():
-    assert clean_slack_text("<@U0123> help") == "/help"
+def test_slack_bare_word_unchanged():
+    assert clean_slack_text("<@U0123> help") == "help"
 
 
-def test_slack_empty_after_strip_defaults_help():
-    assert clean_slack_text("<@U0123>") == "/help"
+def test_slack_empty_after_strip():
+    assert clean_slack_text("<@U0123>") == ""
 
 
 def test_slack_multiple_mentions():
@@ -33,5 +33,5 @@ def test_reddit_does_not_strip_similar_name():
     assert "mybot2" in out
 
 
-def test_reddit_plain_text_becomes_command():
-    assert clean_reddit_text("u/mybot profile", "mybot") == "/profile"
+def test_reddit_plain_text_unchanged():
+    assert clean_reddit_text("u/mybot profile", "mybot") == "profile"

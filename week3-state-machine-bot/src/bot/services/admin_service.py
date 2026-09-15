@@ -46,9 +46,8 @@ class AdminService:
         return f"User {target} unbanned."
 
     async def broadcast(self, text: str) -> str:
-        # Week 1: stub. Real fan-out needs a queue + per-platform rate limits
-        # and arrives with the scheduled-jobs work in Week 2.
+        # Stub: real fan-out requires a queue and per-platform rate limits.
         if not text.strip():
             raise ValidationError("Usage: /admin broadcast <message>")
         logger.info("broadcast requested (stub): %r", text)
-        return "Broadcast queued (stub — delivery lands in Week 2)."
+        return "Broadcast unavailable (stub — no delivery configured)."
