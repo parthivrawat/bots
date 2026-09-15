@@ -167,7 +167,7 @@ See <ref_file file="E:\Bots\week1-chatbot\README.md" /> for detailed setup.
 |------|---------|--------|-------|-------|------|
 | 1 | Platform-Agnostic Chat Bot | ✅ COMPLETE | 24/24 | 8/8 | ✅ |
 | 2 | Scheduled Bot | ✅ COMPLETE | 29/29 | 12/12 | ✅ |
-| 3 | State Machine Bot | � NEXT | — | — | — |
+| 3 | State Machine Bot | ✅ COMPLETE | 27/27 | 4/4 | ✅ |
 | 4 | LLM Chat Bot | 📋 PLANNED | — | — | — |
 | 5 | RAG Bot | 📋 PLANNED | — | — | — |
 | 6 | Prompt Engineering | 📋 PLANNED | — | — | — |

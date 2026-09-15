@@ -1,0 +1,49 @@
+{
+  "suite": "week3-state-machine-bot",
+  "cases": [
+    {
+      "id": "report-starts",
+      "input": "/report",
+      "context": {
+        "platform_user_id": "week3-report-user"
+      },
+      "expected": {
+        "must_contain": ["category", "bug", "feature", "question"]
+      },
+      "tags": ["state-machine", "report"]
+    },
+    {
+      "id": "onboard-starts",
+      "input": "/onboard",
+      "context": {
+        "platform_user_id": "week3-onboard-user"
+      },
+      "expected": {
+        "must_contain": ["city"]
+      },
+      "tags": ["state-machine", "onboard"]
+    },
+    {
+      "id": "cancel-no-active",
+      "input": "/cancel",
+      "context": {
+        "platform_user_id": "week3-cancel-user"
+      },
+      "expected": {
+        "must_contain": ["no active"]
+      },
+      "tags": ["state-machine", "cancel"]
+    },
+    {
+      "id": "help-shows-state-commands",
+      "input": "/help",
+      "context": {
+        "platform_user_id": "week3-help-user"
+      },
+      "expected": {
+        "must_contain": ["/report", "/onboard", "/cancel"]
+      },
+      "tags": ["state-machine", "help"]
+    }
+  ]
+}
